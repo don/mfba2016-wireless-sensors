@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- EXTERNAL LIBS-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="https://www.google.com/jsapi"></script>
+
+    <script>
+
+      function drawChart() {
+          
+        // JSONP request
+        var jsonData = $.ajax({
+          url: 'https://data.sparkfun.com/output/lzjR0AM18KINLa0bqznY.json',
+          data: {page: 1},
+          dataType: 'jsonp',
+        }).done(function (results) {
+            
+          console.log(results);
+
+          var humidityData = new google.visualization.DataTable();
+          var tempData = new google.visualization.DataTable();
+
+          humidityData.addColumn('datetime', 'Time');
+          humidityData.addColumn('number', 'Humidity');
+
+          tempData.addColumn('datetime', 'Time');
+          tempData.addColumn('number', 'Temp');
+
+          $.each(results, function (i, row) {
+            humidityData.addRow([
+              (new Date(row.timestamp)),
+              parseFloat(row.humidity),
+            ]);
+          });
+
+          $.each(results, function (i, row) {
+            tempData.addRow([
+              (new Date(row.timestamp)),
+              parseFloat(row.temp)
+            ]);
+          });
+
+          var humidityChart = new google.visualization.LineChart($('#humidityChart').get(0));
+          var tempChart = new google.visualization.LineChart($('#tempChart').get(0));
+
+          humidityChart.draw(humidityData, {
+            title: 'Humidity'
+          });
+          tempChart.draw(tempData, {
+            title: 'Temperature'
+          });
+
+        });
+      }
+
+      // load chart lib
+      google.load('visualization', '1', {
+        packages: ['corechart']
+      });
+
+      // call drawChart once google charts is loaded
+      google.setOnLoadCallback(drawChart);
+
+    </script>
+
+  </head>
+  <body>
+    <div id="tempChart" style="width: 100%;"></div>
+    <div id="humidityChart" style="width: 100%;"></div>
+    <script>
+        drawChart();
+    </script>
+  </body>
+</html>
